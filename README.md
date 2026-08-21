@@ -1,666 +1,474 @@
-# hash-lookup-and-hash-identifier
+# Hash Intelligence & Lookup Resources
 
+A curated reference for **hash lookup, password-hash identification, structured-hash analysis, breach checking, and forensic hash intelligence**.
 
-
-
-# Hash Lookup & Hash Identifier Toolkit
-
-A curated collection of online **hash lookup**, **hash identification**, and **password-hash analysis** tools.
-
-> **Primary use:** authorized security testing, CTFs, incident response, password-audit work, and recovery of credentials you are permitted to analyze.
->
-> **Privacy warning:** do not paste live passwords, password-manager secrets, or production credentials into third-party services. Prefer client-side/local tools when the data is sensitive.
-
-## Table of Contents
-
-- [Category 1 — Hash Check / Plaintext Lookup](#category-1--hash-check--plaintext-lookup)
-- [Category 2 — Hash Identifier / Type / Salt Analysis](#category-2--hash-identifier--type--salt-analysis)
-- [How to choose a tool](#how-to-choose-a-tool)
-- [Important: hash type vs salt detection](#important-hash-type-vs-salt-detection)
-- [Recommended workflow](#recommended-workflow)
-- [Privacy and operational security](#privacy-and-operational-security)
-- [Notes on database size](#notes-on-database-size)
+> **Scope:** This README intentionally excludes Telegram bots/groups and stolen-log/credential-search resources. It focuses on legitimate hash-analysis and defensive security tooling.
 
 ---
 
-# Category 1 — Hash Check / Plaintext Lookup
+## Contents
 
-These services compare a supplied hash against precomputed/cracked datasets. They are useful when you have an **authorized** hash and want to see whether a known plaintext match already exists.
-
-## 👑 1. BinSec HashLookup — TOP PICK / Original Favorite
-
-**URL:** <https://binsec.tools/lookup/hash/>
-
-**Supported:** MD5, SHA1, NTLM  
-**Database:** 7.5+ billion passwords / 3.3 TB database  
-**Salt:** The documented database contains **unsalted** SHA1, MD5 and NTLM hashes.  
-**Best for:** Simple, fast lookup of common legacy hashes.
-
-BinSec's HashLookup is the closest match to the original goal of this collection. The service explicitly describes a database containing more than **7.5 billion passwords** and their unsalted SHA1, MD5 and NTLM hashes.
-
-### Useful characteristics
-
-- Very simple web UI.
-- Dedicated algorithm selection for SHA1, MD5 and NTLM.
-- Intended for pentesting / security-research workflows.
-- Sources listed by the service include SecLists password sets, RockYou2021, Fortinet2021, Honeynet and other loaded password lists.
-
-**Official page:** <https://binsec.tools/lookup/hash/>
+- [1. Hash Lookup / Plaintext Database Services](#1-hash-lookup--plaintext-database-services)
+- [2. Hash Identifier / Type Detection](#2-hash-identifier--type-detection)
+- [3. Salted vs Unsalted Analysis](#3-salted-vs-unsalted-analysis)
+- [4. Breach / Exposure Checking](#4-breach--exposure-checking)
+- [5. Forensic / Known-File Hash Intelligence](#5-forensic--known-file-hash-intelligence)
+- [6. Local / Offline Heavyweight Tools](#6-local--offline-heavyweight-tools)
+- [7. Recommended Workflow](#7-recommended-workflow)
+- [8. Database-Size Claims: Important Caveat](#8-database-size-claims-important-caveat)
+- [9. Privacy & Safety](#9-privacy--safety)
 
 ---
 
-## 2. BaconHash
+# 1. Hash Lookup / Plaintext Database Services
 
-**URL:** <https://baconhash.pw/>
+These services are primarily useful when you already have a hash and want to determine whether a previously recovered/plaintext value exists in a precomputed corpus.
 
-**Supported:** MD5, NTLM, SHA1  
-**Claimed database:** 126+ billion entries **per algorithm**  
-**Batch:** Yes, one hash per line  
-**Automation:** REST API / `bacon` CLI (token required)
+| Rank | Service | Main formats | Advertised / documented scale | Notes |
+|---|---|---|---:|---|
+| 🥇 | **BinSec HashLookup** | MD5, SHA1, NTLM | **7.5B passwords** | Original reference service; large legacy corpus. |
+| 🥈 | **CMD5** | MD5, SHA1, SHA256 and others | **~20.408T claimed unique hashes** | Extremely large published claim; some queries may enter a background job. Treat the number as a claim, not an independently audited count. |
+| 🥉 | **BaconHash** | MD5, NTLM, SHA1 | **126B+ claimed per algorithm** | One of the strongest currently advertised multi-algorithm corpora. |
+| 4 | **CrackCrypt** | MD5, SHA1, NTLM, SHA256, SHA512 | **30B claimed per algorithm / 150B total** | Large multi-algorithm lookup service with API documentation. |
+| 5 | **Weakpass Lookup** | MD5, NTLM, SHA1, SHA256 | **26B passwords** | Lookup page says processing can happen client-side. |
+| 6 | **NTLM.PW** | NT/NTLM, LM, SHA256 | **8.726B unique hashes** | Particularly relevant for NTLM; bulk/API functionality available. |
+| 7 | **CrackStation** | LM, NTLM, MD5, SHA1, SHA224/256/384/512, RIPEMD160, Whirlpool | **15B MD5/SHA1 + 1.5B other** | Long-running classic lookup corpus. |
+| 8 | **Hashes.com** | MD5, SHA1, NTLM, SHA256, SHA512, bcrypt, MySQL, WordPress, etc. | Large accumulated database | Broadest all-round lookup + identifier combination in this list. |
+| 9 | **MD5Decrypt** | Primarily MD5 plus additional hashes | Large historical corpus | Especially useful as another MD5 source; exact current database scale is not independently established here. |
+| 10 | **WhatsMyIP Hash Lookup** | MD5, SHA1 | **~2.23B hashes** | Smaller independent corpus; useful as another cross-check. |
 
-A major alternative to BinSec for raw MD5/NTLM/SHA1 lookup. BaconHash also accepts several practical credential-dump formats, including `user:hash`, Windows domain dumps and LDAP SHA1 representations.
+### 🔗 Direct links
 
-**API documentation:** <https://baconhash.pw/api-docs>
+- **BinSec:** https://binsec.tools/lookup/hash/
+- **CMD5:** https://www.cmd5.org/
+- **BaconHash:** https://baconhash.pw/
+- **CrackCrypt:** https://crackcrypt.com/
+- **Weakpass:** https://weakpass.com/tools/lookup
+- **NTLM.PW:** https://ntlm.pw/
+- **CrackStation:** https://crackstation.net/
+- **Hashes.com:** https://hashes.com/en/decrypt/hash
+- **MD5Decrypt:** https://md5decrypt.net/en/
+- **WhatsMyIP:** https://www.whatsmyip.org/hash-lookup/
 
----
-
-## 3. CrackCrypt
-
-**URL:** <https://crackcrypt.com/hash-lookup>
-
-**Supported:** MD5, SHA1, SHA256, SHA512, NTLM  
-**Claimed coverage:** 30 billion lines per supported algorithm / 150 billion total  
-**Public API:** Yes  
-**API rate limit:** 1 request/second/IP  
-**Privacy:** Hash lookup is server-side; other listed utilities are client-side.
-
-A newer high-volume lookup option with dedicated prepared databases for five algorithms.
-
-**API:** <https://crackcrypt.com/api>
-
----
-
-## 4. Hashes.com — Lookup / Decrypt
-
-**Lookup:** <https://hashes.com/en/decrypt/hash/>
-
-**Supported:** Many hash formats  
-**API:** Yes  
-**Batch:** API supports up to 250 hashes per request  
-**Salt format:** `hash[:salt]`
-
-Hashes.com combines identification and lookup, making it useful when you are not completely sure how a stored hash was constructed.
-
-Its API documentation also exposes the algorithm and salt in returned matches where available.
-
-**API documentation:** <https://hashes.com/en/docs>
+> **Important:** Database-size figures are not directly comparable. One service may count password candidates, another unique hashes, another rows across multiple algorithms, and another several source datasets combined.
 
 ---
 
-## 5. CrackStation
+# 2. Hash Identifier / Type Detection
 
-**URL:** <https://crackstation.net/>
+These tools are useful when the algorithm is unknown and you need to determine likely formats from length, characters, prefixes, delimiters, or known structured syntax.
 
-**Supported:** LM, NTLM, MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512, RIPEMD160, Whirlpool, MySQL 4.1+ and additional formats.
+| Rank | Tool | Strength | Privacy / processing |
+|---|---|---|---|
+| 🥇 | **Hashes.com Hash Identifier** | Broad format coverage, multiple possibilities, `hash[:salt]`, expert mode | Web service |
+| 🥈 | **Toolsana Hash Identifier** | 100+ formats; bcrypt, Argon2, scrypt, PBKDF2, NTLM, MySQL, LDAP, Unix crypt, etc. | Browser tool |
+| 🥉 | **J-Kit Hash Identifier** | Strong structured-format analysis; can expose cost/parameters where encoded | Browser tool |
+| 4 | **dCode Hash Identifier** | 350+ possible formats / broad algorithm reference | Web service |
+| 5 | **BrowserUtils Hash Identifier** | MD5/SHA/bcrypt/Argon2/scrypt/NTLM and local browser processing | Client-side |
+| 6 | **Aback Tools** | Confidence-ranked candidate identification | Browser/local processing |
+| 7 | **HackUtils Hash Identifier** | Identification plus Hashcat modes | Web tool |
+| 8 | **HackerDNA Hash Identifier** | Good ambiguity/context explanations | Web tool |
+| 9 | **Toolali Hash Identifier** | 50+ formats and multiple candidates | Web tool |
+| 10 | **WebToolMatrix Hash Identifier** | Structured formats and potential salt/parameter analysis | Web tool |
+| 11 | **ScanSuite Hash Identifier** | Ranked candidates and confidence analysis | Browser tool |
+| 12 | **Gizza Tools** | bcrypt, Argon2, MD5, SHA, NTLM, sha512crypt, PHPass and others | Client-side claims |
+| 13 | **KitLab Hash Analyzer** | Digest-family analysis and security-oriented metadata | Browser tool |
+| 14 | **Dozenkit Hash Identifier** | Identifier + verifier + reference material | Browser tool |
+| 15 | **ZeroServer Hash Identifier** | Lightweight local identification | Browser tool |
+| 16 | **mlab.sh Hash Identifier** | Candidate ranking and ambiguity warnings | Client-side |
+| 17 | **OneDev Hash Identifier** | Hash format plus common password-hash structures | Web tool |
+| 18 | **J-Kit / related local hash tools** | Good for structured crypt formats | Local/browser |
+| 19 | **NameThatHash** | Local/offline hash identification | Local |
+| 20 | **HashID** | Classic offline hash identification | Local |
 
-**Documented lookup tables:**
+### 🔗 Direct links
 
-- MD5 + SHA1: ~190 GB / 15 billion entries
-- Other supported hashes: ~19 GB / 1.5 billion entries
-
-CrackStation is one of the classic precomputed lookup services. Its documented database is older, but it remains valuable for broad legacy-hash coverage.
-
-**Important:** CrackStation explicitly targets **non-salted hashes**.
-
----
-
-## 6. Weakpass Lookup
-
-**URL:** <https://weakpass.com/tools/lookup>
-
-**Claimed corpus:** 26+ billion passwords  
-**Use:** Large lookup / wordlist ecosystem  
-**Privacy:** The lookup page advertises client-side processing.
-
-Weakpass is especially useful when you want a huge corpus without immediately uploading the raw hash to a remote service.
-
----
-
-## 7. NTLM.pw
-
-**URL:** <https://ntlm.pw/>
-
-**Primary focus:** NTLM / LM / related hash lookup  
-**Automation:** API available  
-**Best for:** Windows credential hashes and NTLM-specific work
-
-A specialized alternative when your dataset is primarily NT hashes.
-
----
-
-## 8. OneDev Tools — Hash Lookup / Identifier
-
-**URL:** <https://onedev.tools/hash/identifier>
-
-Useful as a lightweight browser tool for hash identification and basic checking. It is not a substitute for a huge external corpus like BinSec, but it is convenient for quick local/browser workflows.
-
----
-
-## 9. Hashes.com API
-
-**URL:** <https://hashes.com/en/docs>
-
-The API exposes both **lookup** and **identifier** endpoints.
-
-Useful features include:
-
-- Batch lookup.
-- `hash[:salt]` support.
-- Returned algorithm field for found hashes.
-- Separate identifier endpoint.
-- Extended identification mode.
-
-This makes Hashes.com particularly useful as a bridge between Category 1 and Category 2.
+- **Hashes.com Identifier:** https://hashes.com/en/tools/hash_identifier
+- **Toolsana:** https://toolsana.com/tools/hash-identifier/
+- **J-Kit:** https://jkit.tools/en/tools/hash-identifier
+- **dCode:** https://www.dcode.fr/hash-identifier
+- **BrowserUtils:** https://www.browserutils.dev/tools/hash-identifier/
+- **Aback Tools:** https://abacktools.com/tools/crypto/utilities/password-hash-identifier
+- **HackUtils:** https://hackutils.com/hash-identifier
+- **HackerDNA:** https://hackerdna.com/tools/hash-identifier
+- **Toolali:** https://toolali.com/cryptography/hash-identifier/
+- **WebToolMatrix:** https://webtoolmatrix.com/hash/free-online-identify-hash-type/
+- **ScanSuite:** https://scansuite.io/tools/hash-identifier/
+- **Gizza:** https://gizza.ai/tools/
+- **KitLab:** https://kitlab.app/en/tools/hash-analyzer
+- **Dozenkit:** https://dozenkit.com/tools/hash-identifier
+- **ZeroServer:** https://zeroserver.tools/hash-identifier/
+- **mlab.sh:** https://mlab.sh/tool/hash-identifier
 
 ---
 
-## Lookup Quick Comparison
+# 3. Salted vs Unsalted Analysis
 
-| Rank | Service | MD5 | SHA1 | NTLM | Other | Large Corpus | API | Salt-aware input |
-|---|---|---:|---:|---:|---|---|---|---|
-| 👑 1 | **BinSec HashLookup** | ✅ | ✅ | ✅ | — | ✅ 7.5B+ | — | Limited / unsalted dataset |
-| 2 | **BaconHash** | ✅ | ✅ | ✅ | — | ✅ 126B+ each | ✅ | ⚠️ |
-| 3 | **CrackCrypt** | ✅ | ✅ | ✅ | SHA256/SHA512 | ✅ 30B each | ✅ | ⚠️ |
-| 4 | **Hashes.com** | ✅ | ✅ | ✅ | Many | ✅ | ✅ | ✅ `hash[:salt]` |
-| 5 | **CrackStation** | ✅ | ✅ | ✅ | Many | ✅ 15B MD5/SHA1 table | — | ❌ Unsalted focus |
-| 6 | **Weakpass** | ✅ | ✅ | ✅ | Large wordlist ecosystem | ✅ 26B+ passwords claimed | — | ❌ |
-| 7 | **NTLM.pw** | — | — | ✅ | LM/SHA256-related | Specialized | ✅ | ⚠️ |
+## The critical rule
 
----
+A raw hash string often **cannot tell you whether the original password hashing process used a salt**.
 
-# Category 2 — Hash Identifier / Type / Salt Analysis
-
-These tools answer a different question:
-
-> **"What hashing scheme does this string look like?"**
-
-This category is for identifying algorithms, structured password formats, parameters, encodings and—in cases where the format actually contains the information—salts and cost parameters.
-
-## 👑 1. Hashes.com Hash Identifier — TOP PICK
-
-**URL:** <https://hashes.com/en/tools/hash_identifier>
-
-A strong general-purpose identifier and the best companion to BinSec in this list.
-
-### Notable features
-
-- Up to 25 hashes in the web UI.
-- `hash[:salt]` input format.
-- **Expert mode** to return all plausible possibilities.
-- Large set of recognized password-hash formats.
-- API identifier endpoint.
-- Extended identification mode can return constructions such as salted MD5 variants and application-specific formats.
-
-**API:** <https://hashes.com/en/docs>
-
----
-
-## 2. dCode Hash Identifier
-
-**URL:** <https://www.dcode.fr/hash-identifier>
-
-One of the broadest online hash-identification references, covering hundreds of candidate formats and providing explanatory results.
-
-Best for:
-
-- Unknown hashes.
-- Comparing several candidate algorithms.
-- Investigating unusual legacy formats.
-
----
-
-## 3. Toolsana Hash Identifier
-
-**URL:** <https://toolsana.com/tools/hash-identifier/>
-
-A strong modern identifier with broad password-hash coverage.
-
-Commonly covered families include:
-
-- MD5 / MD4 / SHA families
-- NTLM
-- bcrypt
-- Argon2
-- scrypt
-- PBKDF2
-- Unix `crypt`
-- MySQL / MSSQL
-- WordPress / Drupal / CMS-oriented formats
-- LDAP and other structured representations
-
-Useful when you need more than a simple "MD5 or SHA1?" guess.
-
----
-
-## 4. WebToolMatrix Hash Identifier
-
-**URL:** <https://webtoolmatrix.com/hash/free-online-identify-hash-type/>
-
-Focused on algorithm recognition from string structure and characteristics such as:
-
-- Length
-- Character set
-- Prefixes
-- Recognizable structured formats
-- Salt-bearing password formats
-
-Useful for triaging unknown password hashes.
-
----
-
-## 5. BrowserUtils Hash Identifier
-
-**URL:** <https://www.browserutils.dev/tools/hash-identifier/>
-
-One of the better privacy-oriented options because the site states the analysis runs in the browser.
-
-Useful families include MD5, SHA-1, SHA-2, bcrypt, Argon2, scrypt, NTLM and other common password-hash formats.
-
-**Best for:** Sensitive hashes where you want an identifier without uploading the value.
-
----
-
-## 6. J-Kit Hash Identifier
-
-**URL:** <https://jkit.tools/en/tools/hash-identifier>
-
-Good at distinguishing between:
-
-- **Certain structural matches**
-- **Probabilistic candidates**
-
-For structured formats it can expose parameters such as cost or other embedded information where the format contains it.
-
----
-
-## 7. Aback Tools — Password Hash Identifier
-
-**URL:** <https://abacktools.com/tools/crypto/utilities/password-hash-identifier>
-
-Useful for browser-side hash identification with confidence-oriented results and support for common password hashing algorithms.
-
----
-
-## 8. HackUtils Hash Identifier
-
-**URL:** <https://hackutils.com/hash-identifier>
-
-Particularly useful for offensive-security / CTF workflows because it can pair an identified algorithm with the corresponding **Hashcat mode**.
-
----
-
-## 9. HackerDNA Hash Identifier
-
-**URL:** <https://hackerdna.com/tools/hash-identifier>
-
-Useful for understanding ambiguous hashes in context.
-
-Example: a 32-character hexadecimal value can match several algorithms; database/application context can materially change the likely answer.
-
----
-
-## 10. Toolali Hash Identifier
-
-**URL:** <https://toolali.com/cryptography/hash-identifier/>
-
-Broad hash-type detection with multiple candidates when an input is inherently ambiguous.
-
----
-
-## 11. ScanSuite Hash Identifier
-
-**URL:** <https://scansuite.io/tools/hash-identifier/>
-
-Browser-oriented identification with candidate ranking and confidence-oriented analysis.
-
----
-
-## 12. Shub Raj Apps Hash Identifier
-
-**URL:** <https://app.shubraj.com/hash-identifier/>
-
-Covers common digest algorithms and password-hash families such as bcrypt, Argon2, PBKDF2, scrypt and NTLM.
-
----
-
-## 13. Gizza Hash Tools
-
-**URL:** <https://gizza.ai/tools/>
-
-Useful coverage around bcrypt, Argon2, MD5, SHA families, NTLM, `sha512crypt`, PHPass and related password formats.
-
----
-
-## 14. KitLab Hash Analyzer
-
-**URL:** <https://kitlab.app/en/tools/hash-analyzer>
-
-More of an analyzer than a simple length checker. It can provide algorithm-family information and security-oriented interpretation.
-
----
-
-## 15. Dozenkit Hash Identifier
-
-**URL:** <https://dozenkit.com/tools/hash-identifier>
-
-Combines hash identification with related verification tooling. Useful for browser-side experimentation and second opinions.
-
----
-
-## 16. ZeroServer Tools Hash Identifier
-
-**URL:** <https://zeroserver.tools/hash-identifier/>
-
-Lightweight identifier with emphasis on ambiguity handling and client-side analysis.
-
----
-
-## 17. Base64.sh Hash Identifier
-
-**URL:** <https://www.base64.sh/hash-identifier/>
-
-Quick detector for common algorithms and structured password formats.
-
----
-
-## 18. Mlab.sh Hash Identifier
-
-**URL:** <https://mlab.sh/tool/hash-identifier>
-
-Useful browser/local-style identification and candidate ranking for ambiguous values.
-
----
-
-## 19. CyberChef
-
-**URL:** <https://gchq.github.io/CyberChef/>
-
-Not a single-purpose hash identifier, but one of the best general-purpose analysis environments for:
-
-- Hashing
-- Encoding/decoding
-- Base64 / hex conversion
-- Extracting and testing transformations
-- Chaining operations
-
-**Best for:** investigating how a stored value may have been transformed before hashing.
-
----
-
-## 20. Name That Hash
-
-**Project:** Search for `Name-That-Hash` on GitHub / PyPI.
-
-A local/offline identification approach. This is useful when you want the **identifier database on your own machine** rather than sending hashes to an online service.
-
----
-
-## 21. HashID
-
-**Project:** `hashid` / HashID tooling.
-
-A classic offline hash-identification utility. It is lightweight and useful in CTF and pentest environments.
-
----
-
-## Identifier Quick Comparison
-
-| Rank | Identifier | Broad coverage | Salt-aware structured formats | Client-side / Local | Extra |
-|---|---|---|---|---|---|
-| 👑 1 | **Hashes.com** | ⭐⭐⭐⭐⭐ | ✅ | Mixed | Expert mode + API |
-| 2 | **dCode** | ⭐⭐⭐⭐⭐ | ✅/candidate-based | Web | Huge reference coverage |
-| 3 | **Toolsana** | ⭐⭐⭐⭐⭐ | ✅ | Web | Detailed format coverage |
-| 4 | **J-Kit** | ⭐⭐⭐⭐ | ✅ | Web | Strong certainty-vs-candidate distinction |
-| 5 | **BrowserUtils** | ⭐⭐⭐⭐ | ✅ | ✅ Browser | Privacy-focused |
-| 6 | **WebToolMatrix** | ⭐⭐⭐⭐ | ✅/heuristic | Web | Salt/structure analysis |
-| 7 | **HackUtils** | ⭐⭐⭐⭐ | ⚠️ | Web | Hashcat modes |
-| 8 | **Aback Tools** | ⭐⭐⭐⭐ | ✅ | ✅ Browser | Confidence-oriented |
-| 9 | **HackerDNA** | ⭐⭐⭐ | ✅/contextual | Web | Explains ambiguity |
-| 10 | **Name That Hash** | ⭐⭐⭐⭐ | ✅ | ✅ Local | Offline option |
-
----
-
-# Important: Hash Type vs Salt Detection
-
-A common mistake is assuming that a hash identifier can always tell you the exact algorithm and whether a salt was used.
-
-It cannot.
-
-## Example: ambiguous raw digest
+For example, this is only a 32-character hexadecimal digest:
 
 ```text
 5f4dcc3b5aa765d61d8327deb882cf99
 ```
 
-This is a 32-character hexadecimal value. It is compatible with multiple possible constructions, including common MD5/MD4/NTLM-style representations.
-
-From that value **alone**, you generally cannot prove:
-
-- the exact algorithm;
-- whether a salt was used elsewhere in the application;
-- where the salt was stored;
-- whether the string is a raw digest or one component of a larger password-hashing construction.
-
-A good identifier should return **candidate algorithms** rather than fake certainty.
-
-## Example: structured password hash
+Depending on context, it may be:
 
 ```text
-$2b$12$...
+MD5
+NTLM
+MD4
+another 128-bit hexadecimal digest
 ```
 
-This is structurally recognizable as bcrypt and includes its cost and salt information in the standard encoded representation.
-
-Another example:
+The string itself does **not** prove:
 
 ```text
-$argon2id$v=19$m=65536,t=3,p=4$...
+salted MD5
+unsalted MD5
+salted NTLM
+unsalted NTLM
 ```
 
-The structure identifies Argon2id and encodes parameters plus the salt representation.
+A better identifier reports **candidate algorithms + confidence** rather than pretending certainty.
 
-### Rule of thumb
+## Structured formats are different
 
-**Raw digest:** identification is often probabilistic.  
-**Structured password hash:** identification can be much more certain because the format itself carries metadata.
+### bcrypt
+
+```text
+$2b$12$N9qo8uLOickgx2ZMRZoMye...
+```
+
+The bcrypt string encodes its cost and salt structure.
+
+### Argon2
+
+```text
+$argon2id$v=19$m=65536,t=3,p=4$<salt>$<hash>
+```
+
+The PHC-style representation explicitly contains the algorithm parameters and salt.
+
+### PBKDF2 / crypt / application-specific formats
+
+These may expose iterations, salts, peppers, or other parameters depending on the exact serialization used.
+
+### Practical conclusion
+
+```text
+Raw digest
+   ↓
+length / character-set analysis
+   ↓
+candidate algorithms
+   ↓
+structured-format parsing
+   ↓
+extract salt / cost / iterations when encoded
+   ↓
+context check (application/database/source)
+```
 
 ---
 
-# Recommended Workflow
+# 4. Breach / Exposure Checking
 
-For an authorized assessment, CTF, or password audit, use the tools in this order:
+These are **not plaintext hash-recovery services**. They answer a different question: whether a password or account identifier has appeared in known breach data.
+
+## Have I Been Pwned – Pwned Passwords
+
+https://haveibeenpwned.com/Passwords
+
+Uses range queries so the complete password hash does not need to be disclosed to the service. Useful for defensive password auditing.
+
+## Have I Been Pwned – Email
+
+https://haveibeenpwned.com/
+
+Checks whether an email address appears in known breach collections.
+
+## GWDG Password Check
+
+https://pwcheck.gwdg.de/
+
+Provides privacy-preserving password exposure checks using range-query mechanisms.
+
+## Google Password Manager Password Checkup
+
+https://passwords.google.com/
+
+Useful for checking saved credentials for compromise, reuse, and weakness.
+
+---
+
+# 5. Forensic / Known-File Hash Intelligence
+
+These should **not** be confused with password plaintext databases.
+
+## CIRCL Hashlookup
+
+https://hashlookup.circl.lu/
+
+Open-source hash intelligence infrastructure oriented toward known files/artifacts and datasets such as NSRL.
+
+GitHub: https://github.com/adulau/hashlookup-server
+
+## HashScanner
+
+https://www.hashscanner.com/
+
+Currently advertises **1.5B+ NIST NSRL file records**, automatic hash-type detection, and bulk lookup capabilities.
+
+Use case:
 
 ```text
-                UNKNOWN HASH
-                     │
-                     ▼
-        ┌─────────────────────────┐
-        │ Category 2: IDENTIFIER  │
-        │                         │
-        │ Hashes.com / Toolsana   │
-        │ dCode / J-Kit           │
-        └────────────┬────────────┘
-                     │
-                     ▼
-       Is the format structurally
-              identifiable?
-              /          \
-            YES            NO
-             │              │
-             ▼              ▼
-      Read parameters     Keep multiple
-      / salt / cost       candidate types
-             │              │
-             └──────┬───────┘
-                    ▼
-         Category 1: LOOKUP
+file hash
+   ↓
+known artifact / known software / known file identification
+```
+
+rather than:
+
+```text
+password hash
+   ↓
+plaintext password
+```
+
+---
+
+# 6. Local / Offline Heavyweight Tools
+
+## mdxfind
+
+https://github.com/Cynosureprime/mdxfind
+
+One of the most interesting options when you want to stop depending on public web services.
+
+The project documentation describes support for hundreds of hash constructions, including:
+
+- MD4 / MD5 / NTLM
+- SHA1 / SHA256 / SHA512
+- salted variants
+- bcrypt
+- scrypt
+- PBKDF2
+- crypt formats
+- HMAC constructions
+- NetNTLMv1/v2
+- chained/composed hashes
+
+The project has also documented high-speed lookup/testing against billion-scale local hash collections.
+
+## NameThatHash
+
+Useful for offline hash-format identification when you do not want to submit hashes to a website.
+
+## HashID
+
+Classic local hash identifier with a large signature database and CLI workflow.
+
+## Hashcat
+
+https://hashcat.net/hashcat/
+
+Not a lookup database. It is a local password-recovery/auditing engine supporting many hash modes and CPU/GPU acceleration.
+
+For authorized auditing, it is the natural next step when a hash is **not** present in a public precomputed database.
+
+---
+
+# 7. Recommended Workflow
+
+## A. Unknown hash
+
+```text
+                    UNKNOWN HASH
+                         │
+                         ▼
+                Hash identifier
+         ┌───────────────┴───────────────┐
+         ▼                               ▼
+   Hashes.com /                    Toolsana / J-Kit
+   dCode / BrowserUtils             second opinion
+         │                               │
+         └──────────────┬────────────────┘
+                        ▼
+               Compare candidates
+                        │
+                        ▼
+          Is it a structured format?
+               ┌────────┴────────┐
+              YES                NO
+               │                  │
+               ▼                  ▼
+       Parse salt/cost/etc.    Use context
+                               + confidence
+```
+
+## B. Known MD5 / SHA1 / NTLM hash
+
+For authorized defensive checking:
+
+```text
+Hash
+ │
+ ├── BinSec
+ ├── BaconHash
+ ├── Weakpass
+ ├── CrackCrypt
+ ├── Hashes.com
+ ├── CrackStation
+ └── NTLM.PW (for NTLM)
+```
+
+Compare independent results rather than assuming a single database is complete.
+
+## C. No public lookup hit
+
+```text
+public databases
+      ↓
+no result
+      ↓
+identify exact format
+      ↓
+check whether salt / iterations / cost are known
+      ↓
+authorized local auditing
+      ↓
+mdxfind / Hashcat / controlled wordlists
+```
+
+## D. Password-manager audit
+
+Prefer:
+
+```text
+local hash identification
+        ↓
+HIBP / k-anonymity breach check
+        ↓
+local password policy checks
+        ↓
+only then consider authorized offline analysis
+```
+
+Do not upload actual live passwords to arbitrary lookup websites.
+
+---
+
+# 8. Database-Size Claims: Important Caveat
+
+Huge numbers look impressive, but they are **not automatically comparable**.
+
+Examples:
+
+```text
+7.5B passwords
+26B passwords
+126B entries per algorithm
+30B lines per algorithm
+20.408T unique hashes claimed
+```
+
+These may represent completely different things:
+
+- unique plaintext passwords
+- unique hash values
+- rows/records
+- multiple algorithms combined
+- multiple source datasets
+- generated candidate spaces
+- historical totals rather than currently searchable records
+
+Therefore:
+
+> **Do not treat “20T” as automatically better than “126B” or “7.5B.”**
+
+The real metrics are:
+
+1. Algorithms supported
+2. Actual searchable records
+3. Coverage of common password populations
+4. Freshness of the corpus
+5. Duplicate rate
+6. Exact-match hit rate
+7. Batch/API limits
+8. Response time
+9. Privacy model
+10. Current availability
+
+---
+
+# 9. Privacy & Safety
+
+A hash is not automatically harmless data. Depending on the source, it may be linked to an account, email address, username, or an actual credential record.
+
+For defensive work:
+
+- Prefer **local/client-side identification** when possible.
+- Prefer **k-anonymity/range-query** breach services for password exposure checks.
+- Do not submit current plaintext passwords to public websites.
+- Only analyze credential material belonging to systems/accounts you are authorized to assess.
+- Treat public “crack databases” as untrusted external services.
+
+---
+
+# Quick Reference
+
+## Best for huge plaintext lookup
+
+**CMD5** → **BaconHash** → **CrackCrypt** → **Weakpass** → **Hashes.com** → **CrackStation** → **NTLM.PW**
+
+## Best for identifying an unknown hash
+
+**Hashes.com Identifier** → **Toolsana** → **J-Kit** → **dCode** → **BrowserUtils** → **HackUtils**
+
+## Best for privacy
+
+**BrowserUtils / mlab.sh / client-side tools** → **HIBP range queries** → **local tools**
+
+## Best for forensic known-file matching
+
+**CIRCL Hashlookup** → **HashScanner / NSRL**
+
+## Best for local/offline advanced analysis
+
+**mdxfind + Hashcat + local authorized datasets**
+
+---
+
+## Final note
+
+The strongest setup is **not one magical lookup website**. It is a layered system:
+
+```text
+       ┌─────────────────────────┐
+       │       HASH INPUT        │
+       └────────────┬────────────┘
                     │
-       ┌────────────┼────────────┐
-       ▼            ▼            ▼
-    BinSec       BaconHash    CrackCrypt
-       │            │            │
-       └────────────┼────────────┘
-                    ▼
-               Hashes.com
+            ┌───────▼───────┐
+            │ IDENTIFICATION│
+            └───────┬───────┘
                     │
-                    ▼
-            Compare results
+        ┌───────────┼───────────┐
+        ▼           ▼           ▼
+     LOOKUP      BREACH      FORENSICS
+        │         CHECK          │
+        ▼           ▼            ▼
+ CMD5/Bacon/    HIBP/GWDG    CIRCL/NSRL
+ Weakpass/etc.
+        │
+        ▼
+  LOCAL AUTHORIZED
+  ANALYSIS IF NEEDED
+        │
+        ▼
+ mdxfind / Hashcat
 ```
 
-## Practical fallback chain
-
-### For MD5 / SHA1 / NTLM
-
-```text
-BinSec
-   ↓
-BaconHash
-   ↓
-CrackCrypt
-   ↓
-Hashes.com
-   ↓
-CrackStation
-   ↓
-Weakpass
-```
-
-### For an unknown password hash
-
-```text
-Hashes.com Identifier
-   ↓
-Toolsana
-   ↓
-dCode
-   ↓
-J-Kit
-   ↓
-BrowserUtils / Aback Tools
-   ↓
-Choose the most defensible format
-   ↓
-Use the appropriate lookup / offline tool
-```
-
----
-
-# Privacy and Operational Security
-
-## Never upload these to random public services
-
-- Current personal passwords
-- Password-manager vault contents
-- Production user databases without authorization
-- API keys
-- Session secrets
-- Authentication tokens
-- Enterprise credential dumps
-
-Even a password hash can be sensitive because a successful lookup may reveal the plaintext password.
-
-## Prefer local tools when possible
-
-For sensitive work, favor:
-
-- Browser-only/client-side identifiers
-- Name That Hash
-- HashID
-- CyberChef running locally
-- Offline wordlists/databases
-
-For remote lookup services, use only hashes you are authorized to submit.
-
----
-
-# Notes on Database Size
-
-Database-size claims from different services are **not directly comparable**.
-
-For example:
-
-```text
-"7.5B passwords"
-```
-
-and
-
-```text
-"126B entries per algorithm"
-```
-
-may represent very different datasets, deduplication rules, transformations, algorithms and password sources.
-
-A larger advertised number does **not automatically mean better coverage** for the particular hash you have.
-
-The best way to compare services is to build a small authorized benchmark corpus and record:
-
-- Found / not found
-- Algorithm
-- Plaintext correctness
-- Lookup latency
-- Batch support
-- API availability
-- Rate limits
-- Privacy model
-- Dataset freshness
-
----
-
-# Best Picks
-
-## 🏆 Best overall lookup stack
-
-1. **BinSec HashLookup** — original favorite and simple MD5/SHA1/NTLM workflow.
-2. **BaconHash** — extremely large claimed MD5/NTLM/SHA1 corpus.
-3. **CrackCrypt** — broad five-algorithm lookup with a public API.
-4. **Hashes.com** — excellent crossover between identification and lookup.
-5. **CrackStation** — classic, proven unsalted-hash database.
-
-## 🧠 Best identifier stack
-
-1. **Hashes.com Identifier** — strongest overall fit for this workflow.
-2. **Toolsana** — broad password-hash coverage.
-3. **dCode** — huge format-reference coverage.
-4. **J-Kit** — strong structured-format analysis.
-5. **BrowserUtils** — privacy-friendly browser analysis.
-
-## 🔒 Best privacy-oriented options
-
-1. **BrowserUtils**
-2. **Weakpass lookup** (where client-side processing is used)
-3. **CyberChef local instance**
-4. **Name That Hash**
-5. **HashID**
-
----
-
-# Important Legal / Safety Note
-
-Use lookup and identification services only for hashes you own or are explicitly authorized to analyze—for example your own password audit, an approved penetration test, incident response, or a CTF/lab.
-
-A hash lookup service is not "decryption" in the usual sense. Most lookup services work by searching precomputed datasets for a matching digest.
-
----
-
-## Source / Verification Notes
-
-The top BinSec entry and several service capabilities in this document were checked against the services' current public pages during **August 2026**.
-
-- BinSec HashLookup: <https://binsec.tools/lookup/hash/>
-- Hashes.com Identifier/API: <https://hashes.com/en/tools/hash_identifier> / <https://hashes.com/en/docs>
-- CrackStation: <https://crackstation.net/>
-- BaconHash: <https://baconhash.pw/> / <https://baconhash.pw/api-docs>
-- CrackCrypt: <https://crackcrypt.com/hash-lookup> / <https://crackcrypt.com/api>
-
-> **Last checked:** August 20, 2026
+**Use the public services as complementary sources, not as a single source of truth.**
